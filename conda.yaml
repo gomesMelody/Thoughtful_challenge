@@ -16,4 +16,4 @@ dependencies:
     - selenium
     - pandas
     - openpyxl
-    - 
+    - chromedriver-py
