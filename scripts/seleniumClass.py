@@ -62,7 +62,7 @@ class SeleniumConn:
         # Submit the search bar
         search_element.submit()
 
-    def iterate_news_by_month(self, month: int, year: int) -> List[Dict[str, Any]]:
+    def iterate_news_by_month(self, month: int, year: int) -> list:
         """
         Iterate over the news on the current page by month.
 

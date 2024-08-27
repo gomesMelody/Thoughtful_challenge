@@ -46,19 +46,22 @@ def search_latimes(search_phrase, period=1):
     # add two columns to the DataFrame
     # the first column is the count of the search phrase
     # in the title and description
-    news_df['count'] = (news_df['title'].str.count(search_phrase)+news_df['description'].str.count(search_phrase))
+    news_df['count'] = (news_df['title'].str.count(search_phrase.lower()) 
+                        + news_df['description'].str.count(search_phrase.lower())
+                        + news_df['title'].str.count(search_phrase.upper()) 
+                        + news_df['description'].str.count(search_phrase.upper()))
 
     # the second column is a boolean indicating if the description
     # contains monetary values
     news_df['has_money'] = (news_df['description'].str.contains(r'\$') 
-                            | news_df['description'].str.contains(r'\USD') 
-                            | news_df['description'].str.contains(r'\dollars') 
-                            | news_df['tittle'].str.contains(r'\$') 
-                            | news_df['tittle'].str.contains(r'\USD') 
-                            | news_df['tittle'].str.contains(r'\dollars'))
+                            | news_df['description'].str.contains(r'USD') 
+                            | news_df['description'].str.contains(r'dollars') 
+                            | news_df['title'].str.contains(r'\$') 
+                            | news_df['title'].str.contains(r'USD') 
+                            | news_df['title'].str.contains(r'dollars'))
 
     # save the DataFrame to an Excel file
-    news_df.to_excel(f"output/results_{today.strftime('%Y-%m-%d')}_{search_phrase}_{period}_{datetime.now().timestamp()}.xlsx")
+    news_df.to_excel(f"output/results_{today.strftime('%Y-%m-%d')}_{search_phrase}_{period}_{datetime.now().timestamp()}.xlsx", index=False)
 
     # close the Selenium connection
     conn.close()
