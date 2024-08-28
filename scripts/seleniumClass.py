@@ -1,6 +1,6 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
+from RPA.Browser.Selenium import Selenium
+from selenium.webdriver.common.keys import Keys
+
 import time
 
 from scripts.utils import parse_date
@@ -19,9 +19,8 @@ class SeleniumConn:
         """
         Initialize the class with a headless chrome options.
         """
-        options = Options()
-        options.add_argument('--headless=new')
-        self.driver = webdriver.Chrome(options=options)
+        
+        self.driver = Selenium()
 
     def connect(self, url: str) -> None:
         """
@@ -31,7 +30,7 @@ class SeleniumConn:
             url (str): The url to connect to.
         """
         # Use the selenium webdriver to navigate to the specified url
-        self.driver.get(url)
+        self.driver.open_available_browser(url)
         
 
     def search_for_phrase(self, phrase: str) -> None:
@@ -44,23 +43,19 @@ class SeleniumConn:
         Args:
             phrase (str): The phrase to search for.
         """
+        
+        
         # Get the magnify icon element
-        search_element = self.driver.find_element(By.XPATH, "//button[@data-element='search-button']")
-
-        # Click on the magnify icon to open the search bar
+        # self.driver.click_button_when_visible("//button[@data-element='search-button']")
+        search_element = self.driver.find_element("//button[@data-element='search-button']")
+        # # Click on the magnify icon to open the search bar
         search_element.click()
 
         # Wait a bit for the search bar to open
         time.sleep(1)
 
-        # Get the search bar element
-        search_element = self.driver.find_element(By.NAME, "q")
-
         # Send the phrase to the search bar
-        search_element.send_keys(phrase)
-
-        # Submit the search bar
-        search_element.submit()
+        self.driver.input_text('name:q',phrase +Keys.ENTER)
 
     def iterate_news_by_month(self, month: int, year: int) -> list:
         """
@@ -84,26 +79,26 @@ class SeleniumConn:
                 - image (str): The filename of the image associated with the news.
         """
         # get element search-results-module-results-menu with xpath
-        tt = self.driver.find_element(By.CLASS_NAME, "search-results-module-results-menu")
-        news_list = tt.find_elements(By.TAG_NAME, "li")
+        result_menu = self.driver.find_element("//ul[@class='search-results-module-results-menu']")
+        news_list = self.driver.find_elements("//li", result_menu)
         valid_news = []
         for news in news_list:
-            text_date = news.find_element(By.CLASS_NAME, "promo-timestamp").text
+            text_date = self.driver.find_element("//p[@class='promo-timestamp']", news).text
             date = parse_date(text_date)
             if date.month == month and date.year == year:
                 # download the image
-                image = news.find_element(By.CLASS_NAME, "image")
-                image_url = image.get_attribute('srcset')
-                image_filename = f"{date.strftime('%Y-%m-%d')}-{news.find_element(By.CLASS_NAME, 'promo-title').text}.jpg"
+                image = self.driver.find_element("//img[@class='image']", news)
+                title = self.driver.find_element("//h3[@class='promo-title']", news).text
+                image_filename = f"{date.strftime('%Y-%m-%d')}-{title}.jpg"
                 open(f"images/{image_filename}", 'wb').write(image.screenshot_as_png)
 
                 # extract the news information
                 valid_news.append({
                     #  'news_element' : news,
-                     'title': news.find_element(By.CLASS_NAME, "promo-title").text,
+                     'title': title,
                      'date': date,
-                     'category': news.find_element(By.CLASS_NAME, "promo-category").text,
-                     'description': news.find_element(By.CLASS_NAME, "promo-description").text,
+                     'category': self.driver.find_element("//p[@class='promo-category']", news).text,
+                     'description': self.driver.find_element("//p[@class='promo-description']", news).text,
                      'image': image_filename
                     })
 

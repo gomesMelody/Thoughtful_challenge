@@ -63,8 +63,6 @@ def search_latimes(search_phrase, period=1):
     # save the DataFrame to an Excel file
     news_df.to_excel(f"output/results_{today.strftime('%Y-%m-%d')}_{search_phrase}_{period}_{datetime.now().timestamp()}.xlsx", index=False)
 
-    # close the Selenium connection
-    conn.close()
 
 if __name__ == "__main__":
     search_latimes("covid", 2)
